@@ -13,6 +13,10 @@ abstract class BST[A]{
   def size: Int
 
   def contains(data: A): Boolean
+
+  def filter(f: A => Boolean): BST[A]
+
+  def filterIter(f: A => Boolean,acc: BST[A]): BST[A]
 }
 
 class NonEmpty[A](elem: A, left: BST[A], right: BST[A] )(implicit ord: Ordering[A]) extends BST[A] {
@@ -50,8 +54,19 @@ class NonEmpty[A](elem: A, left: BST[A], right: BST[A] )(implicit ord: Ordering[
     else if(ord.gt(data,elem)) right.contains(data)
     else true
   }
-}
 
+  override def filterIter(f: A => Boolean,acc: BST[A]): BST[A] = {
+    val ac = {
+      if(f(elem)) acc.include(elem)
+      else acc
+    }
+    left.filterIter(f,right.filterIter(f,ac))
+  }
+
+  override def filter(f: A => Boolean): BST[A] = {
+    filterIter(f, new Null[A])
+  }
+}
 
 class Null[A](implicit ord: Ordering[A]) extends BST[A]{
 
@@ -69,8 +84,10 @@ class Null[A](implicit ord: Ordering[A]) extends BST[A]{
 
   override def contains(data: A): Boolean = false
 
-}
+  override def filter(f: A => Boolean): BST[A] = this
 
+  override def filterIter(f: A => Boolean, acc: BST[A]): BST[A] = this
+}
 
 object BST {
 
