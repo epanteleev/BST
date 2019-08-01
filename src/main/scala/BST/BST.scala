@@ -1,11 +1,10 @@
 package BST
 import math.Ordering
-import scala.runtime.Nothing$
 
-abstract class BST[A,K]{
-  def union(tree: BST[A,K]): BST[A,K]
+abstract class BST[+A,K]{
+  def union[B >: A](tree: BST[B,K]): BST[B,K]
 
-  def include(data:(A,K)): BST[A,K]
+  def include[B >: A] (data:(B,K)): BST[B,K]
 
   def remove(k: K): Option[(BST[A,K],A)]
 
@@ -13,13 +12,13 @@ abstract class BST[A,K]{
 
   def size: Int
 
-  def contains(data: A)(implicit ordA : Ordering[A]): Boolean
+  def contains[B >: A](data: B)(implicit ordA : Ordering[B]): Boolean
 
   def find(k: K): Option[A]
 
   def filter(f: (A,K) => Boolean): BST[A,K]
 
-  def filterIter(f: (A,K) => Boolean,acc: BST[A,K]): BST[A,K]
+  def filterIter[B >: A](f: (A,K) => Boolean,acc: BST[B,K]): BST[B,K]
 }
 
 class NonEmpty[A,K](elem: A,key: K, left: BST[A,K], right: BST[A,K] )(implicit ord: Ordering[K]) extends BST[A,K] {
@@ -30,11 +29,11 @@ class NonEmpty[A,K](elem: A,key: K, left: BST[A,K], right: BST[A,K] )(implicit o
     left.foreach(f)
   }
 
-  override def union(tree: BST[A,K]): BST[A,K] = {
+  override def union[B >: A](tree: BST[B, K]): BST[B, K] = {
     ((left union right) union tree) include (elem,key)
   }
 
-  override def include(data: (A,K)): BST[A, K] = {
+  override def include[B >: A](data: (B, K)): BST[B, K] = {
     if(ord.lt(data._2 , key)) new NonEmpty(elem,key, left.include(data), right)
     else if( ord.gt(data._2, key)) new NonEmpty(elem,key, left, right.include(data))
     else this
@@ -65,12 +64,12 @@ class NonEmpty[A,K](elem: A,key: K, left: BST[A,K], right: BST[A,K] )(implicit o
 
   override def size: Int = right.size + left.size + 1
 
-  override def contains(data: A)(implicit ordA : Ordering[A]): Boolean = {
+  override def contains[B >: A](data: B)(implicit ordA: Ordering[B]): Boolean = {
     if(ordA.equiv(data, elem)) true
     else right.contains(data) | left.contains(data)
   }
 
-  override def filterIter(f: (A,K) => Boolean, acc: BST[A,K]): BST[A,K] = {
+  override def filterIter[B >: A](f: (A, K) => Boolean, acc: BST[B, K]): BST[B, K] = {
     val ac = {
       if(f(elem,key)) acc.include((elem,key))
       else acc
@@ -91,7 +90,7 @@ class NonEmpty[A,K](elem: A,key: K, left: BST[A,K], right: BST[A,K] )(implicit o
 
 class Null[A,K](implicit ord: Ordering[K]) extends BST[A,K]{
 
-  override def union(tree:  BST[A,K]): BST[A,K]  = tree
+  override def union[B >: A](tree: BST[B, K]): BST[B, K] = tree
 
   override def foreach(f: (A,K) => Unit): Unit = ()
 
@@ -99,15 +98,15 @@ class Null[A,K](implicit ord: Ordering[K]) extends BST[A,K]{
 
   override def remove(key: K): Option[(BST[A,K],A)] = None
 
-  override def include(data: (A,K)): BST[A, K] =  new NonEmpty[A,K](data._1,data._2, new Null[A,K], new Null[A,K])(ord)
+  override def include[B >: A](data: (B, K)): BST[B, K] = new NonEmpty[B,K](data._1,data._2, new Null[B,K], new Null[B,K])(ord)
 
   override def toString: String = "."
 
-  override def contains(data: A)(implicit ordA : Ordering[A]): Boolean = false
+  override def contains[B >: A](data: B)(implicit ordA: Ordering[B]): Boolean = false
 
   override def filter(f: (A,K) => Boolean): BST[A,K] = this
 
-  override def filterIter(f: (A,K) => Boolean, acc: BST[A,K]): BST[A,K] = this
+  override def filterIter[B >: A](f: (A, K) => Boolean, acc: BST[B, K]): BST[B, K] = this
 
   override def find(key: K): Option[A] = None
 }
