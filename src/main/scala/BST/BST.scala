@@ -18,7 +18,7 @@ abstract class BST[+A,K]{
 
   def filter(f: (A,K) => Boolean): BST[A,K]
 
-  def filterIter[B >: A](f: (A,K) => Boolean,acc: BST[B,K]): BST[B,K]
+  def filterIter[B >: A](f: (B,K) => Boolean,acc: BST[B,K]): BST[B,K]
 }
 
 class NonEmpty[A,K](elem: A,key: K, left: BST[A,K], right: BST[A,K] )(implicit ord: Ordering[K]) extends BST[A,K] {
@@ -69,7 +69,7 @@ class NonEmpty[A,K](elem: A,key: K, left: BST[A,K], right: BST[A,K] )(implicit o
     else right.contains(data) | left.contains(data)
   }
 
-  override def filterIter[B >: A](f: (A, K) => Boolean, acc: BST[B, K]): BST[B, K] = {
+  override def filterIter[B >: A](f: (B, K) => Boolean, acc: BST[B, K]): BST[B, K] = {
     val ac = {
       if(f(elem,key)) acc.include((elem,key))
       else acc
@@ -106,7 +106,7 @@ class Null[A,K](implicit ord: Ordering[K]) extends BST[A,K]{
 
   override def filter(f: (A,K) => Boolean): BST[A,K] = this
 
-  override def filterIter[B >: A](f: (A, K) => Boolean, acc: BST[B, K]): BST[B, K] = this
+  override def filterIter[B >: A](f: (B, K) => Boolean, acc: BST[B, K]): BST[B, K] = this
 
   override def find(key: K): Option[A] = None
 }
